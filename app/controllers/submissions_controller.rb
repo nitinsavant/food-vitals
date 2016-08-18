@@ -2,6 +2,7 @@ class SubmissionsController < ApplicationController
   before_action :find_submission, only: [:show, :edit, :update, :destroy]
 
   def index
+    @submissions = Submission.all.order("created_at DESC")
   end
 
   def show
@@ -18,6 +19,22 @@ class SubmissionsController < ApplicationController
     else
       render 'new'
     end
+  end
+
+  def edit
+  end
+
+  def update
+    if @workout.update(workout_params)
+      redirect_to @workout
+    else
+      render 'edit'
+    end
+  end
+
+  def destroy
+    @workout.destroy
+    redirect_to root_path
   end
 
   private

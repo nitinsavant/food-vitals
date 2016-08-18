@@ -1,1 +1,9 @@
-<h1>This is the submissions#index placeholder</h1>
+<h1>All Submissions</h1>
+
+<div id="index_submissions">
+  <% @submissions.each do |submission| %>
+    <h3>
+      <%= link_to submission.url, submission %>
+    </h3>
+  <% end %>
+</div>
