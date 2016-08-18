@@ -1,0 +1,6 @@
+<%= form_for(@submission) do |f| %>
+
+  <%= f.text_field :url, class: 'form-control', placeholder: 'Paste recipe link and hit enter.' %>
+  <%= f.submit "Submit", class: 'button postfix' %>
+
+<% end %>
