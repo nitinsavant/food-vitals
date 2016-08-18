@@ -25,16 +25,16 @@ class SubmissionsController < ApplicationController
   end
 
   def update
-    if @workout.update(workout_params)
-      redirect_to @workout
+    if @submission.update(submission_params)
+      redirect_to @submission
     else
       render 'edit'
     end
   end
 
   def destroy
-    @workout.destroy
-    redirect_to root_path
+    @submission.destroy
+    redirect_to submissions_path
   end
 
   private
