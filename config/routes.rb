@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
-  resources :submissions
   root 'static_pages#home'
-  get 'static_pages/help'
+  get   '/help',   to: 'static_pages#help'
+  get   '/submit', to: 'submissions#new'
+  post  '/submit', to: 'submissions#create'
+  resources :submissions
 
 end

@@ -60,6 +60,9 @@ GEM
     execjs (2.7.0)
     ffi (1.9.14)
     formatador (0.2.5)
+    foundation-icons-sass-rails (3.0.0)
+      railties (>= 3.1.1)
+      sass-rails (>= 3.1.1)
     foundation-rails (6.2.3.0)
       railties (>= 3.1.0)
       sass (>= 3.3.0, < 3.5)
@@ -206,7 +209,8 @@ PLATFORMS
 DEPENDENCIES
   byebug
   coffee-rails (~> 4.2)
-  foundation-rails
+  foundation-icons-sass-rails (= 3.0.0)
+  foundation-rails (= 6.2.3.0)
   guard
   guard-minitest
   jbuilder (~> 2.5)
@@ -215,9 +219,9 @@ DEPENDENCIES
   minitest-reporters
   pg (~> 0.18)
   puma (~> 3.0)
-  rails (~> 5.0.0, >= 5.0.0.1)
+  rails (= 5.0.0.1)
   rails-controller-testing
-  sass-rails (~> 5.0)
+  sass-rails (~> 5.0.0)
   spring
   spring-watcher-listen (~> 2.0.0)
   turbolinks (~> 5)
