@@ -11,4 +11,8 @@ class StaticPagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "submission show page should contain recipe title" do
+
+  end
+
 end

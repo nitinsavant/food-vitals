@@ -3,7 +3,7 @@ require 'test_helper'
 class SubmissionTest < ActiveSupport::TestCase
 
   def setup
-    @submission = Submission.new(url: "http://www.nitinsavant.com")
+    @submission = Submission.new(url: "http://BUtternutmountainfarm.com/about-maple/recipes/raw-maple-cashew-energy-balls")
   end
 
   test "should be valid" do
@@ -34,6 +34,11 @@ class SubmissionTest < ActiveSupport::TestCase
       @submission.url = invalid_url
       assert_not @submission.valid?, "#{invalid_url.inspect} should be invalid"
     end
+  end
+
+  test "title should be grabbed from html using url" do
+    @submission.save
+    assert_not_nil @submission.title
   end
 
 

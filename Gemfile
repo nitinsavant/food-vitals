@@ -11,6 +11,7 @@ gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.5'
 gem 'foundation-rails', '6.2.3.0'
 gem 'foundation-icons-sass-rails', '3.0.0'
+gem 'nokogiri', '~> 1.6', '>= 1.6.8'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
