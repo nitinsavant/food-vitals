@@ -2,10 +2,11 @@ require 'uri'
 require 'open-uri'
 
 class Submission < ApplicationRecord
-  before_save :getTitleUrl, :downcase_attributes
+  before_validation :smart_add_url_protocol
   validates :url, presence: true, length: { maximum: 2048 },
                     uniqueness: {case_sensitive: false}
   validate :valid_uri?
+  before_save :getTitleUrl, :downcase_attributes
 
   private
 
@@ -23,6 +24,12 @@ class Submission < ApplicationRecord
   def getTitleUrl
     noko_object = Nokogiri::HTML(open(self.url))
     self.title = noko_object.css("title")[0].text
+  end
+
+  def smart_add_url_protocol
+    unless self.url[/\Ahttp:\/\//] || self.url[/\Ahttps:\/\//]
+      self.url = "http://#{self.url}"
+    end
   end
 
 end
