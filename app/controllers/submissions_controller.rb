@@ -15,10 +15,10 @@ class SubmissionsController < ApplicationController
   def create
     @submission = Submission.new(submission_params)
     if @submission.save
-      flash[:success] = "Submission successful."
+      flash[:success] = "Recipe submitted!"
       redirect_to @submission
     else
-      render 'new'
+      render 'static_pages/home'
     end
   end
 
