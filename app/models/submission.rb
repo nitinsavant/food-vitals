@@ -8,6 +8,14 @@ class Submission < ApplicationRecord
   validate :valid_uri?
   before_save :getTitleUrl, :downcase_attributes
 
+  def self.get_recipe(url)
+    response = Unirest.get "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/extract?forceExtraction=false&url=#{url}",
+    headers:{
+      "X-Mashape-Key" => ENV['SPOONACULAR_API']
+    }
+    return response
+  end
+
   private
 
   def valid_uri?
