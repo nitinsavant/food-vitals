@@ -6,6 +6,7 @@ class SubmissionsController < ApplicationController
   end
 
   def show
+    # recipe = Submission.get_recipe(params[:url])
   end
 
   def new
