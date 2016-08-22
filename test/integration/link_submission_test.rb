@@ -17,10 +17,6 @@ class LinkSubmissionTest < ActionDispatch::IntegrationTest
     assert_difference 'Submission.count', 1 do
       post submissions_path, params: { submission: { url: url } }
     end
-    follow_redirect!
-    assert_template 'submissions/show'
-    assert_match url, response.body
-    assert_match title, response.body
     # delete submission
     first_submission = Submission.first
     assert_difference 'Submission.count', -1 do

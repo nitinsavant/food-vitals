@@ -3,12 +3,13 @@ require 'open-uri'
 
 class Submission < ApplicationRecord
   validates :url, presence: true, length: { maximum: 2048 },
-                    uniqueness: {case_sensitive: false}
+                    uniqueness: { case_sensitive: false }
   validate :valid_uri?
   before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol
 
-  def self.get_ingredients(url)
-    url = "http://www.foodista.com/recipe/WZ82F5RR/saffron-infused-rice-pudding-with-sweetened-whole-wheat-pancakes"
+  def self.get_ingredients(id)
+    # url = "http://butternutmountainfarm.com/about-maple/recipes/raw-maple-cashew-energy-balls"
+    url = Submission.find(id).url
     response = Unirest.get "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/extract?forceExtraction=false&url=#{url}",
     headers:{
       "X-Mashape-Key" => ENV['SPOONACULAR_API']
