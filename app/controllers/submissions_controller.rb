@@ -14,7 +14,6 @@ class SubmissionsController < ApplicationController
   end
 
   def create
-    params[:spoon_recipe_response] = Submission.get_recipe_from_spoon(params[:url])
     @submission = Submission.new(submission_params)
     if @submission.save
       flash[:success] = "Recipe submitted!"

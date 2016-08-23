@@ -4,21 +4,12 @@ require 'open-uri'
 class Submission < ApplicationRecord
   validates :url, presence: true, length: { maximum: 2048 },
                     uniqueness: { case_sensitive: false }
-  validates :spoon_recipe_response, presence: true
   validate :valid_uri?
-  before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol
+  before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol, :get_recipe_from_spoon
 
   def self.get_ingredients_from_response(id)
-    response = Submission.find(id).spoon_recipe_response
-    ingredients_array = response.body["extendedIngredients"]
+    ingredients_array = Submission.find(id).spoon_recipe_response
     ingredients_array.map{|hash| hash["originalString"]}
-  end
-
-  def self.get_recipe_from_spoon(url)
-    response = Unirest.get "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/extract?forceExtraction=false&url=#{url}",
-    headers:{
-      "X-Mashape-Key" => ENV['SPOONACULAR_API']
-    }
   end
 
   private
@@ -37,6 +28,15 @@ class Submission < ApplicationRecord
   def getTitleUrl
     noko_object = Nokogiri::HTML(open(self.url))
     self.title = noko_object.css("title")[0].text
+  end
+
+  def get_recipe_from_spoon
+    url = self.url
+    response = Unirest.get "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/extract?forceExtraction=false&url=#{url}",
+    headers:{
+      "X-Mashape-Key" => ENV['SPOONACULAR_API']
+    }
+    self.spoon_recipe_response = response.body
   end
 
   def smart_add_url_protocol

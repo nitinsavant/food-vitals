@@ -15,11 +15,6 @@ class SubmissionTest < ActiveSupport::TestCase
     assert_not @submission.valid?
   end
 
-  test "spoonacular recipe response should be present" do
-    @submission.spoon_recipe_response = ''
-    assert_not @submission.valid?
-  end
-
   test "url should not be longer than what's supported by most browsers" do
     @submission.url = 'a' * 2049
     assert_not @submission.valid?
@@ -44,6 +39,13 @@ class SubmissionTest < ActiveSupport::TestCase
   test "title should be grabbed from html using url" do
     @submission.save
     assert_not_nil @submission.title
+  end
+
+  test "call spoonacular API" do
+    url = "http://www.melskitchencafe.com/the-best-fudgy-brownies/"
+    @submission = Submission.new( { url: url } )
+    @submission.save
+    assert_not_nil @submission.spoon_recipe_response
   end
 
 end
