@@ -3,7 +3,7 @@ require 'test_helper'
 class SubmissionTest < ActiveSupport::TestCase
 
   def setup
-    @submission = Submission.new(url: "http://BUtternutmountainfarm.com/about-maple/recipes/raw-maple-cashew-energy-balls")
+    @submission = Submission.new(url: "http://BUtternutmountainfarm.com/about-maple/recipes/raw-maple-cashew-energy-balls", spoon_recipe_response: "<>")
   end
 
   test "should be valid" do
@@ -12,6 +12,11 @@ class SubmissionTest < ActiveSupport::TestCase
 
   test "url should be present" do
     @submission.url = ''
+    assert_not @submission.valid?
+  end
+
+  test "spoonacular recipe response should be present" do
+    @submission.spoon_recipe_response = ''
     assert_not @submission.valid?
   end
 
@@ -40,6 +45,5 @@ class SubmissionTest < ActiveSupport::TestCase
     @submission.save
     assert_not_nil @submission.title
   end
-
 
 end

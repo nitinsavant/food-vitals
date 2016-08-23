@@ -6,7 +6,7 @@ class SubmissionsController < ApplicationController
   end
 
   def show
-    @ingredients = Submission.get_ingredients(params[:id])
+    @ingredients = Submission.get_ingredients_from_response(params[:id])
   end
 
   def new
@@ -14,6 +14,7 @@ class SubmissionsController < ApplicationController
   end
 
   def create
+    params[:spoon_recipe_response] = Submission.get_recipe_from_spoon(params[:url])
     @submission = Submission.new(submission_params)
     if @submission.save
       flash[:success] = "Recipe submitted!"
@@ -42,7 +43,7 @@ class SubmissionsController < ApplicationController
   private
 
   def submission_params
-    params.require(:submission).permit(:url)
+    params.require(:submission).permit(:url, :spoon_recipe_response)
   end
 
   def find_submission
