@@ -6,7 +6,7 @@ class SubmissionsController < ApplicationController
   end
 
   def show
-    @ingredients = Submission.get_ingredients_from_response(params[:id])
+    # @ingredients = Submission.get_ingredients_from_response(params[:id])
   end
 
   def new
