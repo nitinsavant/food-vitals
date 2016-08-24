@@ -17,7 +17,7 @@ class SubmissionsController < ApplicationController
     @submission = Submission.new(submission_params)
     if @submission.save
       redirect_to @submission
-    elsif @submission.errors.messages[:url] = "has already been taken"
+    elsif @submission.errors.messages[:url] == "has already been taken"
       @original_submission = Submission.find_by(url: submission_params[:url])
       redirect_to @original_submission
     else
