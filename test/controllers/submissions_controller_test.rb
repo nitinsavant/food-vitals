@@ -15,9 +15,10 @@ class SubmissionsControllerTest < ActionDispatch::IntegrationTest
   test "create valid submission" do
     get root_path
     url = "http://www.example.org"
+    spoon_recipe_response = "<>"
     title = "Example Domain"
     assert_difference 'Submission.count', 1 do
-      post submissions_path, params: { submission: { url: url } }
+      post submissions_path, params: { submission: { url: url, spoon_recipe_response: spoon_recipe_response } }
     end
   end
 

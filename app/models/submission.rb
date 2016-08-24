@@ -2,14 +2,14 @@ require 'uri'
 require 'open-uri'
 
 class Submission < ApplicationRecord
-  validates :url, presence: true, length: { maximum: 2048 },
-                    uniqueness: { case_sensitive: false }
+  serialize :spoon_recipe_response
+  validates :url, presence: true, length: { maximum: 2048 }, uniqueness: { case_sensitive: false }
   validate :valid_uri?
   before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol, :get_recipe_from_spoon
 
   def self.get_ingredients_from_response(id)
     ingredients_array = Submission.find(id).spoon_recipe_response
-    ingredients_array.map{|hash| hash["originalString"]}
+    ingredients_array["extendedIngredients"].map{|hash| hash["originalString"]}
   end
 
   private
@@ -31,12 +31,14 @@ class Submission < ApplicationRecord
   end
 
   def get_recipe_from_spoon
-    url = self.url
-    response = Unirest.get "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/extract?forceExtraction=false&url=#{url}",
-    headers:{
-      "X-Mashape-Key" => ENV['SPOONACULAR_API']
-    }
-    self.spoon_recipe_response = response.body
+    if self.spoon_recipe_response.nil?
+      url = self.url
+      response = Unirest.get "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/extract?forceExtraction=false&url=#{url}",
+      headers:{
+        "X-Mashape-Key" => ENV['SPOONACULAR_API']
+      }
+      self.spoon_recipe_response = response.body
+    end
   end
 
   def smart_add_url_protocol

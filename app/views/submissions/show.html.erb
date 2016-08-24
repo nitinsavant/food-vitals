@@ -3,9 +3,11 @@
   <p>
     <%= @submission.url %>
   </p>
-  <p>
-    <%= render 'ingredients' %>
-  </p>
+  <div>
+    <% @ingredients.each do |element| %>
+      <li><%= element %></li>
+    <% end %>
+  </div>
 </div>
 
 <%= link_to "Back", root_path %>

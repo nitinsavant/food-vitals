@@ -36,15 +36,11 @@ class SubmissionTest < ActiveSupport::TestCase
     end
   end
 
-  test "title should be grabbed from html using url" do
-    @submission.save
-    assert_not_nil @submission.title
-  end
-
-  test "call spoonacular API" do
+  test "call spoonacular API to grab response and grab title from HTML" do
     url = "http://www.melskitchencafe.com/the-best-fudgy-brownies/"
     @submission = Submission.new( { url: url } )
     @submission.save
+    assert_not_nil @submission.title
     assert_not_nil @submission.spoon_recipe_response
   end
 
