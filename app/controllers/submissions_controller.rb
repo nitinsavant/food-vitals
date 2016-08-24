@@ -16,8 +16,10 @@ class SubmissionsController < ApplicationController
   def create
     @submission = Submission.new(submission_params)
     if @submission.save
-      flash[:success] = "Recipe submitted!"
       redirect_to @submission
+    elsif @submission.errors.messages[:url] = "has already been taken"
+      @original_submission = Submission.find_by(url: submission_params[:url])
+      redirect_to @original_submission
     else
       render 'static_pages/home'
     end
