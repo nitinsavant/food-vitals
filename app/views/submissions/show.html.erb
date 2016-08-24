@@ -1,2 +1,15 @@
+<div id="submission">
+  <h1> <%= @submission.title %> <h1>
+  <p>
+    <%= @submission.url %>
+  </p>
+  <div>
+    <% @ingredients.each do |element| %>
+      <li><%= element %></li>
+    <% end %>
+  </div>
+</div>
 
+<%= link_to "Back", root_path %>
+<%= link_to "Edit", edit_submission_path(@submission) %>
 <%= link_to "Delete", submission_path(@submission), method: :delete, data: { confirm: "Are you sure?" } %>
