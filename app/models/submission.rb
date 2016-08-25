@@ -7,9 +7,13 @@ class Submission < ApplicationRecord
   validate :valid_uri?
   before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol, :get_recipe_from_spoon
 
-  def self.get_ingredients_from_response(id)
+  def self.fatsecret_ingredient_lookup(id)
     ingredients_array = Submission.find(id).spoon_recipe_response
-    ingredients_array["extendedIngredients"].map{|hash| hash["originalString"]}
+    ingredients_array["extendedIngredients"].map{|hash| hash["name"]}
+    ingredients_array.each do |ingredient|
+      # API call to fatsecret for each ingredient. Return the JSON and parse out nutrition facts.
+    end
+    return "nutrition facts"
   end
 
   private

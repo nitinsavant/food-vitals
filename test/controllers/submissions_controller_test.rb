@@ -23,6 +23,8 @@ class SubmissionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "delete submission" do
+    @submission = Submission.new(url: "http://BUtternutmountainfarm.com/about-maple/recipes/raw-maple-cashew-energy-balls", spoon_recipe_response: "<>")
+    @submission.save
     first_submission = Submission.first
     assert_difference 'Submission.count', -1 do
       delete submission_path(first_submission)
