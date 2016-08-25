@@ -13,9 +13,8 @@ class Submission < ApplicationRecord
   before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol, :get_recipe_from_spoon
 
   def self.fatsecret_ingredient_lookup(id)
-    SECRET = ENV['FATSECRET_CONSUMER_SHARED_SECRET']
     http_method = 'GET'
-    request_url = "http://platform.fatsecret.com/rest/server.api"
+    REQUEST_URL = "http://platform.fatsecret.com/rest/server.api"
     # Parameters are written in the format "name=value" and sorted using
     # lexicographical byte value ordering, first by name and then by value.
     oauth_params = {
@@ -24,7 +23,7 @@ class Submission < ApplicationRecord
         :oauth_signature_method => "HMAC-SHA1",
         :oauth_timestamp => Time.now.to_i,
         :oauth_version => "1.0",
-        :method => 'foods.search',
+        :method => "foods.search",
         :search_expression => expression
     }
     sorted_oauth_params = oauth_params.sort {|a, b| a.first.to_s <=> b.first.to_s}
@@ -33,26 +32,33 @@ class Submission < ApplicationRecord
     concat_oauth_params = sorted_oauth_params.collect{|pair| "#{pair.first}=#{pair.last}"}.join('&')
     # Request parameters (i.e. the HTTP Method, Request URL and Normalized Parameters) must be
     # encoded using the [RFC3986] percent-encoding (%xx) mechanism and concatenated by '&' character.
-    request_params = [http_method.esc, request_url.esc, concat_oauth_params.esc]
+    request_params = [http_method.esc, REQUEST_URL.esc, concat_oauth_params.esc]
     signature_base_string = request_params.join("&")
     list = []
     sorted_oauth_params.inject(list) {|arr, pair| arr << "#{pair.first.to_s}=#{pair.last}"}
     http_params = list.join("&")
-
+    # Use the HMAC-SHA1 signature algorithm as defined by the [RFC2104] to sign the request where
+    # text is the Signature Base String and key is the concatenated values of the Consumer Secret
+    # and Access Secret separated by an '&' character (show '&' even if Access Secret is empty
+    # as some methods do not require an Access Token).
+    token = ''
+    SECRET = ENV['FATSECRET_CONSUMER_SHARED_SECRET']
+    secret = "#{SECRET.esc}&#{token.esc}"
+    oauth_sign = Base64.encode64(OpenSSL::HMAC.digest('sha1', secret, signature_base_string)).gsub(/\n/,'')
+    # The calculated digest octet string, first base64-encoded per [RFC2045], then escaped
+    # using the [RFC3986] percent-encoding (%xx) mechanism is the oauth_signature.
+    oauth_sign_esc = oauth_sign.esc
+    parts = http_params.split('&')
+    parts << "oauth_signature=#{oauth_sign_esc}"
+    uri = URI.parse("#{REQUEST_URL}?#{parts.join('&')}")
+    results = Net::HTTP.get(uri)
+    # Retrieve ingredients_array from database that was called from Spoonacular
     ingredients_array = Submission.find(id).spoon_recipe_response
     ingredients_array["extendedIngredients"].map{|hash| hash["name"]}
-
     ingredients_array.each do |ingredient|
 
-      token = ''
-      secret = "#{SECRET.esc}&#{token.esc}"
-      sign = Base64.encode64(OpenSSL::HMAC.digest('sha1',secret, base)).gsub(/\n/,'')
-      sig = sign.esc
-      parts = http_params.split('&')
-      parts << "oauth_signature=#{sig}"
-      uri = URI.parse("#{request_url}?#{parts.join('&')}")
-      results = Net::HTTP.get(uri)
     end
+    results = search('sugar')
     return "nutrition facts"
   end
 
