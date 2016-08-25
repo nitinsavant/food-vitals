@@ -55,11 +55,11 @@ class Submission < ApplicationRecord
     # Retrieve ingredients_array from database that was called from Spoonacular
     ingredients_array = Submission.find(id).spoon_recipe_response
     ingredients_array["extendedIngredients"].map{|hash| hash["name"]}
-    ingredients_array.each do |ingredient|
-
-    end
+    # ingredients_array.each do |ingredient|
+    #
+    # end
     results = search('sugar')
-    return "nutrition facts"
+    # return "nutrition facts"
   end
 
   private
