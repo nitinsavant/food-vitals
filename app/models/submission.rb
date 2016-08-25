@@ -4,6 +4,7 @@ require 'openssl'
 require 'base64'
 require 'digest/md5'
 require 'net/http'
+require 'ext/string'
 
 class Submission < ApplicationRecord
   serialize :spoon_recipe_response
@@ -12,10 +13,12 @@ class Submission < ApplicationRecord
   before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol, :get_recipe_from_spoon
 
   def self.fatsecret_ingredient_lookup(id)
-    secret = ENV['FATSECRET_CONSUMER_SHARED_SECRET']
+    SECRET = ENV['FATSECRET_CONSUMER_SHARED_SECRET']
     http_method = 'GET'
     request_url = "http://platform.fatsecret.com/rest/server.api"
-    params = {
+    # Parameters are written in the format "name=value" and sorted using
+    # lexicographical byte value ordering, first by name and then by value.
+    oauth_params = {
         :oauth_consumer_key => ENV['FATSECRET_CONSUMER_API_KEY'],
         :oauth_nonce => Digest::MD5.hexdigest(rand(11).to_s),
         :oauth_signature_method => "HMAC-SHA1",
@@ -24,24 +27,27 @@ class Submission < ApplicationRecord
         :method => 'foods.search',
         :search_expression => expression
     }
-    sorted_params = params.sort {|a, b| a.first.to_s <=> b.first.to_s}
-    param_str = sorted_params.collect{|pair| "#{pair.first}=#{pair.last}"}.join('&')
+    sorted_oauth_params = oauth_params.sort {|a, b| a.first.to_s <=> b.first.to_s}
+    # Finally the parameters are concatenated in their sorted order into a
+    # single string, each name-value pair separated by an '&' character.
+    concat_oauth_params = sorted_oauth_params.collect{|pair| "#{pair.first}=#{pair.last}"}.join('&')
+    # Request parameters (i.e. the HTTP Method, Request URL and Normalized Parameters) must be
+    # encoded using the [RFC3986] percent-encoding (%xx) mechanism and concatenated by '&' character.
+    request_params = [http_method.esc, request_url.esc, concat_oauth_params.esc]
+    signature_base_string = request_params.join("&")
+    list = []
+    sorted_oauth_params.inject(list) {|arr, pair| arr << "#{pair.first.to_s}=#{pair.last}"}
+    http_params = list.join("&")
 
     ingredients_array = Submission.find(id).spoon_recipe_response
     ingredients_array["extendedIngredients"].map{|hash| hash["name"]}
 
     ingredients_array.each do |ingredient|
 
-      list = [http_method.esc, request_url.esc, param_str.esc]
-      base = list.join("&")
-      pairs = params.sort {|a, b| a.first.to_s <=> b.first.to_s}
-      list = []
-      pairs.inject(list) {|arr, pair| arr << "#{pair.first.to_s}=#{pair.last}"}
-      http_params = list.join("&")
       token = ''
       secret = "#{SECRET.esc}&#{token.esc}"
       sign = Base64.encode64(OpenSSL::HMAC.digest('sha1',secret, base)).gsub(/\n/,'')
-      sig = CGI.escape(sign).gsub("%7E", "~").gsub("+", "%20")
+      sig = sign.esc
       parts = http_params.split('&')
       parts << "oauth_signature=#{sig}"
       uri = URI.parse("#{request_url}?#{parts.join('&')}")
