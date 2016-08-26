@@ -14,20 +14,24 @@ class Submission < ApplicationRecord
 
   def self.get_fatsecret_food_ids(id)
     # Retrieve ingredients_array from database that was called from Spoonacular
-    ingredients_array = Submission.find(id).spoon_recipe_response
-    ingredients_array["extendedIngredients"].map{|hash| hash["name"]}
+    spoon_recipe_response = Submission.find(id).spoon_recipe_response
+    ingredients_array = spoon_recipe_response["extendedIngredients"].map{|hash| hash["name"]}
     food_ids = []
+    xml_response = ""
+    uri = ""
     ingredients_array.each do |ingredient|
       query_params = {
         :method => 'foods.search',
-        :search_expression => ingredient,
+        :search_expression => ingredient.esc,
         :page_number => 0,
         :max_results => 1
       }
       xml_response = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
-      food_ids.push(doc.at_xpath("//foods/food/food_id"))
+      # food_ids.push(doc.at_xpath("//food_id/text()"))
+      food_ids = doc.at_xpath("//food_id/text()")
     end
+    return ingredients_array, food_ids
   end
 
   private
@@ -65,16 +69,17 @@ class Submission < ApplicationRecord
     end
   end
 
-  def self.generate_send_fatsecret_request(query_params)
+  def self.generate_fatsecret_request(query_params)
     http_method = 'GET'
     request_url = "http://platform.fatsecret.com/rest/server.api"
+    digest = OpenSSL::Digest::Digest.new('sha1')
+    oauth_token = ''
     oauth_params = {
         :oauth_consumer_key => ENV['FATSECRET_CONSUMER_API_KEY'],
         :oauth_nonce => Digest::MD5.hexdigest(rand(11).to_s),
         :oauth_signature_method => "HMAC-SHA1",
         :oauth_timestamp => Time.now.to_i,
-        :oauth_version => "1.0",
-        :oauth_token => ""
+        :oauth_version => "1.0"
     }
     # Add query paramaters for specific API method to oauth parameters
     oauth_params.merge!(query_params)
@@ -96,13 +101,13 @@ class Submission < ApplicationRecord
     # and Access Secret separated by an '&' character (show '&' even if Access Secret is empty
     # as some methods do not require an Access Token).
     shared_secret = ENV['FATSECRET_CONSUMER_SHARED_SECRET']
-    secret = "#{shared_secret.esc}&#{oauth_token.esc}"
-    oauth_sign = Base64.encode64(OpenSSL::HMAC.digest('sha1', secret, signature_base_string)).gsub(/\n/,'')
+    secret_token = "#{shared_secret.esc}&#{oauth_token.esc}"
+    oauth_sign = Base64.encode64(OpenSSL::HMAC.digest(digest, secret_token, signature_base_string)).gsub(/\n/,'')
     # The calculated digest octet string, first base64-encoded per [RFC2045], then escaped
     # using the [RFC3986] percent-encoding (%xx) mechanism is the oauth_signature.
-    oauth_sign_esc = oauth_sign.esc
+    oauth_sign = oauth_sign.esc
     parts = http_params.split('&')
-    parts << "oauth_signature=#{oauth_sign_esc}"
+    parts << "oauth_signature=#{oauth_sign}"
     uri = URI.parse("#{request_url}?#{parts.join('&')}")
     results = Net::HTTP.get(uri)
   end
