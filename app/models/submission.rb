@@ -22,7 +22,7 @@ class Submission < ApplicationRecord
     ingredients_array.each do |ingredient|
       query_params = {
         :method => 'foods.search',
-        :search_expression => ingredient,
+        :search_expression => ingredient.esc,
         :page_number => 0,
         :max_results => 1
       }
@@ -101,7 +101,7 @@ class Submission < ApplicationRecord
     # and Access Secret separated by an '&' character (show '&' even if Access Secret is empty
     # as some methods do not require an Access Token).
     shared_secret = ENV['FATSECRET_CONSUMER_SHARED_SECRET']
-    secret_token = "#{shared_secret.esc}&#{oauth_token.esc}"
+    secret_token = "#{shared_secret.esc}&#{oauth_token}"
     oauth_sign = Base64.encode64(OpenSSL::HMAC.digest(digest, secret_token, signature_base_string)).gsub(/\n/,'')
     # The calculated digest octet string, first base64-encoded per [RFC2045], then escaped
     # using the [RFC3986] percent-encoding (%xx) mechanism is the oauth_signature.
