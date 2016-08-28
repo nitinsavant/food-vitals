@@ -18,7 +18,7 @@ class Submission < ApplicationRecord
     ingredients_array = spoon_recipe_response["extendedIngredients"].map{|hash| hash["name"]}
     food_ids = []
     xml_response = ""
-    uri = ""
+
     ingredients_array.each do |ingredient|
       query_params = {
         :method => 'foods.search',
@@ -28,8 +28,7 @@ class Submission < ApplicationRecord
       }
       xml_response = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
-      # food_ids.push(doc.at_xpath("//food_id/text()"))
-      food_ids = doc.at_xpath("//food_id/text()")
+      food_ids.push(doc.at_xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text)
     end
     return ingredients_array, food_ids
   end
