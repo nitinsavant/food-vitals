@@ -71,8 +71,8 @@ class Submission < ApplicationRecord
   def self.generate_fatsecret_request(query_params)
     http_method = 'GET'
     request_url = "http://platform.fatsecret.com/rest/server.api"
-    # digest = OpenSSL::Digest::Digest.new('sha1')
-    digest = OpenSSL::Digest::SHA1.new
+    digest = OpenSSL::Digest::Digest.new('sha1')
+    # digest = OpenSSL::Digest::SHA1.new
     oauth_token = ''
     oauth_params = {
         :oauth_consumer_key => ENV['FATSECRET_CONSUMER_API_KEY'],
