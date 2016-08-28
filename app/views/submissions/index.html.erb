@@ -4,6 +4,8 @@
   <% @submissions.each do |submission| %>
     <h3>
       <%= link_to submission.url, submission %>
+      --
+      <%= link_to "Delete", submission_path(submission), method: :delete, data: { confirm: "Are you sure?" } %>
     </h3>
   <% end %>
 </div>
