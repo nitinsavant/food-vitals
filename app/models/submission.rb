@@ -22,7 +22,7 @@ class Submission < ApplicationRecord
     ingredients_array.each do |ingredient|
       query_params = {
         :method => 'foods.search',
-        :search_expression => ingredient.esc,
+        :search_expression => ingredient,
         :page_number => 0,
         :max_results => 1
       }
