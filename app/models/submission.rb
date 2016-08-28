@@ -28,7 +28,7 @@ class Submission < ApplicationRecord
       }
       xml_response = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
-      food_ids.push(doc.at_xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text)
+      food_ids.push(doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text)
     end
     return ingredients_array, food_ids
   end
