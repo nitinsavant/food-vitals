@@ -7,6 +7,7 @@ require 'net/http'
 require 'ext/string'
 
 class Submission < ApplicationRecord
+  has_many :ingredients, dependent: :destroy
   serialize :spoon_recipe_response
   validates :url, presence: true, length: { maximum: 2048 }, uniqueness: { case_sensitive: false }
   validate :valid_uri?
@@ -14,7 +15,8 @@ class Submission < ApplicationRecord
 
   def self.get_fatsecret_food_ids(id)
     # Retrieve ingredients_array from database that was called from Spoonacular
-    spoon_recipe_response = Submission.find(id).spoon_recipe_response
+    submission = Submission.find(id)
+    spoon_recipe_response = submission.spoon_recipe_response
     ingredients_array = spoon_recipe_response["extendedIngredients"].map{|hash| hash["name"]}
     food_ids = []
     xml_response = ""
@@ -28,9 +30,28 @@ class Submission < ApplicationRecord
       }
       xml_response = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
-      food_ids.push(doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text)
+      ingredient_food_id = doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text
+      submission.ingredients.create(name: ingredient, food_id: ingredient_food_id)
     end
-    return ingredients_array, food_ids
+  end
+
+  def self.get_fatsecret_nutrition(id)
+    nutrition_facts = []
+    xml_response = ""
+    get_fatsecret_food_ids(id)
+    food_ids = Ingredient.where(submission_id: id).pluck(:food_id).to_a
+    food_ids.each do |food_id|
+      query_params = {
+        :method => 'recipe.get',
+        :search_expression => ingredient.esc,
+        :page_number => 0,
+        :max_results => 1
+      }
+      xml_response = generate_fatsecret_request(query_params)
+      # doc = Nokogiri::XML(xml_response)
+      # ingredient_food_id = doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text
+    end
+    return xml_response
   end
 
   private

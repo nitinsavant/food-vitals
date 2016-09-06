@@ -3,7 +3,8 @@ require 'test_helper'
 class SubmissionTest < ActiveSupport::TestCase
 
   def setup
-    @submission = Submission.new(url: "http://BUtternutmountainfarm.com/about-maple/recipes/raw-maple-cashew-energy-balls", spoon_recipe_response: "<>")
+    @submission = Submission.new(url: "http://butternutmountainfarm.com/about-maple/recipes/raw-maple-cashew-energy-balls",
+                                 spoon_recipe_response: "<>")
   end
 
   test "should be valid" do
@@ -37,11 +38,17 @@ class SubmissionTest < ActiveSupport::TestCase
   end
 
   test "call spoonacular API to grab response and grab title from HTML" do
-    url = "http://www.melskitchencafe.com/the-best-fudgy-brownies/"
-    @submission = Submission.new( { url: url } )
     @submission.save
     assert_not_nil @submission.title
     assert_not_nil @submission.spoon_recipe_response
+  end
+
+  test "associated microposts should be destroyed" do
+    @submission.save
+    @submission.ingredients.create!(name: "Sugar", food_id: 100)
+    assert_difference 'Ingredient.count', -1 do
+      @submission.destroy
+    end
   end
 
 end

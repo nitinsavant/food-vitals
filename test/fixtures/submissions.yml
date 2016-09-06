@@ -1,1 +1,5 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.htmlw
+
+fudgy:
+  url: "http://www.melskitchencafe.com/the-best-fudgy-brownies/"
+  spoon_recipe_response: "<>"

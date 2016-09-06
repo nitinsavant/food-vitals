@@ -6,7 +6,7 @@ class SubmissionsController < ApplicationController
   end
 
   def show
-    @ingredients, @foods = Submission.get_fatsecret_food_ids(@submission.id)
+    @foods = Submission.get_fatsecret_nutrition(@submission.id)
   end
 
   def new
