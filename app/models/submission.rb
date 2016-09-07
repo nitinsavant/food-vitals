@@ -14,14 +14,13 @@ class Submission < ApplicationRecord
   before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol, :get_recipe_from_spoon
 
   def self.get_fatsecret_food_ids(id)
+    food_ids = []
+    xml_response = ""
     # Retrieve ingredients_array from database that was called from Spoonacular
     submission = Submission.find(id)
     spoon_recipe_response = submission.spoon_recipe_response
-    ingredients_array = spoon_recipe_response["extendedIngredients"].map{|hash| hash["name"]}
-    amounts_array = spoon_recipe_response["extendedIngredients"].map{|hash| hash["amount"]}
-    food_ids = []
-    xml_response = ""
-
+    spoon_ingredients = spoon_recipe_response["extendedIngredients"].map{|hash| hash.slice("name", "amount") }
+    ingredients_array = spoon_ingredients.map{|hash| hash["name"]}
     ingredients_array.each do |ingredient|
       query_params = {
         :method => 'foods.search',
@@ -34,12 +33,13 @@ class Submission < ApplicationRecord
       ingredient_food_id = doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text
       submission.ingredients.create(name: ingredient, food_id: ingredient_food_id)
     end
+    return spoon_ingredients
   end
 
   def self.get_fatsecret_nutrition(id)
     xml_response = ""
     nutrition_facts = {}
-    get_fatsecret_food_ids(id)
+    spoon_ingredients = get_fatsecret_food_ids(id)
     food_ids = Ingredient.where(submission_id: id).pluck(:food_id).to_a
     food_name = ""
     serving_description = ""
@@ -60,6 +60,10 @@ class Submission < ApplicationRecord
       sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.text
       nutrition_facts[food_name] = { serving_description: serving_description, calories: calories, carbohydrate: carbohydrate,
                                      protein: protein, fiber: fiber, sugar: sugar }
+
+      spoon_ingredients.each do |hash|
+
+      end
     end
 
 
