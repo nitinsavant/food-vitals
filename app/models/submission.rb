@@ -19,9 +19,8 @@ class Submission < ApplicationRecord
     # Retrieve ingredients_array from database that was called from Spoonacular
     submission = Submission.find(id)
     spoon_recipe_response = submission.spoon_recipe_response
-    spoon_ingredients = spoon_recipe_response["extendedIngredients"].map{|hash| hash.slice("name", "amount") }
-    ingredients_array = spoon_ingredients.map{|hash| hash["name"]}
-    ingredients_array.each do |ingredient|
+    ingredients_amounts = spoon_recipe_response["extendedIngredients"].map{|hash| hash.slice("name", "amount") }
+    ingredients_amounts.each do |ingredient, amount|
       query_params = {
         :method => 'foods.search',
         :search_expression => ingredient.esc,
@@ -31,26 +30,24 @@ class Submission < ApplicationRecord
       xml_response = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
       ingredient_food_id = doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text
-      submission.ingredients.create(name: ingredient, food_id: ingredient_food_id)
+      submission.ingredients.create(name: ingredient, food_id: ingredient_food_id, amount: amount)
     end
-    return spoon_ingredients
   end
 
   def self.get_fatsecret_nutrition(id)
     xml_response = ""
-    nutrition_facts = {}
-    spoon_ingredients = get_fatsecret_food_ids(id)
-    food_ids = Ingredient.where(submission_id: id).pluck(:food_id).to_a
-    food_name = ""
+    fatsecret_food_name = ""
     serving_description = ""
-    food_ids.each do |food_id|
+    nutrition_facts = {}
+    food_ids_amounts = Ingredient.where(submission_id: id).pluck(:food_id, :amount).to_a
+    food_ids_amounts.each do |food_id, amount|
       query_params = {
         :method => 'food.get',
         :food_id => food_id
       }
       xml_response = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
-      food_name = doc.xpath("/*[name()='food']/*[name()='food_name']").text
+      fatsecret_food_name = doc.xpath("/*[name()='food']/*[name()='food_name']").text
       serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
       calories = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='calories']").first.text
       carbohydrate = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='carbohydrate']").first.text
@@ -58,15 +55,9 @@ class Submission < ApplicationRecord
       # trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.text
       fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.text
       sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.text
-      nutrition_facts[food_name] = { serving_description: serving_description, calories: calories, carbohydrate: carbohydrate,
+      nutrition_facts[food_id] = { fatsecret_food_name: fatsecret_food_name, serving_description: serving_description, amount: amount, calories: calories, carbohydrate: carbohydrate,
                                      protein: protein, fiber: fiber, sugar: sugar }
-
-      spoon_ingredients.each do |hash|
-
-      end
     end
-
-
     return nutrition_facts
   end
 
