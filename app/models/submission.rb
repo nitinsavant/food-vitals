@@ -18,6 +18,7 @@ class Submission < ApplicationRecord
     submission = Submission.find(id)
     spoon_recipe_response = submission.spoon_recipe_response
     ingredients_array = spoon_recipe_response["extendedIngredients"].map{|hash| hash["name"]}
+    amounts_array = spoon_recipe_response["extendedIngredients"].map{|hash| hash["amount"]}
     food_ids = []
     xml_response = ""
 
@@ -36,22 +37,33 @@ class Submission < ApplicationRecord
   end
 
   def self.get_fatsecret_nutrition(id)
-    nutrition_facts = []
     xml_response = ""
+    nutrition_facts = {}
     get_fatsecret_food_ids(id)
     food_ids = Ingredient.where(submission_id: id).pluck(:food_id).to_a
+    food_name = ""
+    serving_description = ""
     food_ids.each do |food_id|
       query_params = {
-        :method => 'recipe.get',
-        :search_expression => ingredient.esc,
-        :page_number => 0,
-        :max_results => 1
+        :method => 'food.get',
+        :food_id => food_id
       }
       xml_response = generate_fatsecret_request(query_params)
-      # doc = Nokogiri::XML(xml_response)
-      # ingredient_food_id = doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text
+      doc = Nokogiri::XML(xml_response)
+      food_name = doc.xpath("/*[name()='food']/*[name()='food_name']").text
+      serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
+      calories = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='calories']").first.text
+      carbohydrate = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='carbohydrate']").first.text
+      protein = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='protein']").first.text
+      # trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.text
+      fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.text
+      sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.text
+      nutrition_facts[food_name] = { serving_description: serving_description, calories: calories, carbohydrate: carbohydrate,
+                                     protein: protein, fiber: fiber, sugar: sugar }
     end
-    return xml_response
+
+
+    return nutrition_facts
   end
 
   private
