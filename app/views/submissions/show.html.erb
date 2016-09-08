@@ -3,9 +3,9 @@
   <p>
     <%= @submission.url %>
   </p>
-  <div>
-    <%= @nutrition_facts %>
-  </div>
+  <%= @ingredients_amount %>
+  <%= @ingredient_food_id %>
+    <%= render 'nutrition' %>
 </div>
 
 <%= link_to "Back", root_path %>
