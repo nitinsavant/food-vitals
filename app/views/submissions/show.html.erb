@@ -1,9 +1,23 @@
-<div id="submission">
-  <h1> <%= @submission.title %> <h1>
-  <p>
-    <%= @submission.url %>
-  </p>
-  <%= @ingredients_amount %>
-  <%= @ingredient_food_id %>
-    <%= render 'nutrition' %>
+<div class="row">
+  <div class="small-12 columns">
+
+    <div id="submission">
+      <h1><%= @submission.title %> <h1>
+      <h5><%=link_to "Original Recipe",  @submission.url %></h5><hr><br>
+
+      <h5>Ingredients amounts (Spoonacular extracted ingredients and amounts from URL)</h5><hr>
+      <%= @ingredients_amount %> <br><br>
+
+      <h5>Food IDs (FatSecret looked up ingredients to find corresponding food_id)</h5><hr>
+      <%= @food_ids %> <br><br>
+
+      <h5>Nutrition per ingredient (FatSecret looked up ids to find nutrition)</h5><hr>
+      <%= @nutrition_facts %> <br><br>
+
+      <h5>Nurition Facts (Nutrition calculated for entire recipe)</h5><hr>
+      <%= render 'nutrition' %>
+    </div>
+
+  </div>
+
 </div>

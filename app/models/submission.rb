@@ -14,6 +14,7 @@ class Submission < ApplicationRecord
   before_save :getTitleUrl, :downcase_attributes, :smart_add_url_protocol, :get_recipe_from_spoon
 
   def self.get_fatsecret_food_ids(id)
+    i=0
     food_ids = []
     ingredient_food_id = ""
     xml_response = ""
@@ -31,13 +32,15 @@ class Submission < ApplicationRecord
       xml_response = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
       ingredient_food_id = doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text
+      food_ids[i] = ingredient_food_id
+      i += 1
       submission.ingredients.create(name: ingredient["name"], food_id: ingredient_food_id, amount: ingredient["amount"])
     end
-    return ingredients_amounts, ingredient_food_id
+    return ingredients_amounts, food_ids
   end
 
   def self.get_fatsecret_nutrition(id)
-    i = 0
+    i=0
     xml_response = ""
     fatsecret_food_name = ""
     serving_description = ""
@@ -61,7 +64,7 @@ class Submission < ApplicationRecord
       nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar ]
       i += 1
     end
-    return nutrition_facts
+    return nutrition_facts, food_id_amounts
   end
 
   def self.calculate_nutrition(id)
@@ -79,6 +82,8 @@ class Submission < ApplicationRecord
       total_sugar = total_sugar + (amount * sugar.to_f)
     end
     nutrition_overview = [total_calories.round, total_carbs.round, total_protein.round, total_fiber.round, total_sugar.round]
+
+    return nutrition_facts, nutrition_overview
   end
 
   private
