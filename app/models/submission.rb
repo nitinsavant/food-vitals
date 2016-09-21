@@ -16,6 +16,7 @@ class Submission < ApplicationRecord
   def self.get_fatsecret_food_ids(id)
     i=0
     food_ids = []
+    oauth_check = []
     ingredient_food_id = ""
     xml_response = ""
     # Retrieve ingredients_array from database that was called from Spoonacular
@@ -29,14 +30,14 @@ class Submission < ApplicationRecord
         :page_number => 0,
         :max_results => 1
       }
-      xml_response = generate_fatsecret_request(query_params)
+      xml_response, oauth_params = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
       ingredient_food_id = doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text
-      food_ids[i] = ingredient_food_id
-      i += 1
       submission.ingredients.create(name: ingredient["name"], food_id: ingredient_food_id, amount: ingredient["amount"])
+      oauth_check[i] = oauth_params
+      i += 1
     end
-    return ingredients_amounts, food_ids
+    return ingredients_amounts, oauth_check
   end
 
   def self.get_fatsecret_nutrition(id)
@@ -44,6 +45,7 @@ class Submission < ApplicationRecord
     xml_response = ""
     fatsecret_food_name = ""
     serving_description = ""
+    oauth_params_get = []
     nutrition_facts = []
     food_ids_amounts = Ingredient.where(submission_id: id).pluck(:food_id, :amount).to_a
     food_ids_amounts.each do |food_id, amount|
@@ -51,24 +53,24 @@ class Submission < ApplicationRecord
         :method => 'food.get',
         :food_id => food_id
       }
-      xml_response = generate_fatsecret_request(query_params)
+      xml_response, oauth_params_get = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
       fatsecret_food_name = doc.xpath("/*[name()='food']/*[name()='food_name']").text
-      # serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
-      calories = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='calories']").first.text
-      carbohydrate = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='carbohydrate']").first.text
-      protein = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='protein']").first.text
+      # calories = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='calories']").first.text
+      # carbohydrate = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='carbohydrate']").first.text
+      # protein = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='protein']").first.text
+      # fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.text
+      # sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.text
       # trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.text
-      fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.text
-      sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.text
-      nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar ]
+      # serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
+      # nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar ]
       i += 1
     end
-    return nutrition_facts, food_id_amounts
+    return nutrition_facts, food_ids_amounts, xml_response, oauth_params_get
   end
 
   def self.calculate_nutrition(id)
-    nutrition_facts = get_fatsecret_nutrition(id)
+    nutrition_facts, food_ids_amounts, xml_response = get_fatsecret_nutrition(id)
     total_calories = 0
     total_carbs = 0
     total_protein = 0
@@ -82,8 +84,7 @@ class Submission < ApplicationRecord
       total_sugar = total_sugar + (amount * sugar.to_f)
     end
     nutrition_overview = [total_calories.round, total_carbs.round, total_protein.round, total_fiber.round, total_sugar.round]
-
-    return nutrition_facts, nutrition_overview
+    return nutrition_facts, nutrition_overview, food_ids_amounts, xml_response
   end
 
   private
@@ -163,6 +164,7 @@ class Submission < ApplicationRecord
     parts << "oauth_signature=#{oauth_sign}"
     uri = URI.parse("#{request_url}?#{parts.join('&')}")
     results = Net::HTTP.get(uri)
+    return results, oauth_params
   end
 
 end

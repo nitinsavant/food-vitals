@@ -6,8 +6,8 @@ class SubmissionsController < ApplicationController
   end
 
   def show
-    @nutrition_facts, @nutrition_overview = Submission.calculate_nutrition(@submission.id)
-    @ingredients_amount, @food_ids = Submission.get_fatsecret_food_ids(@submission.id)
+    @nutrition_facts, @nutrition_overview, @food_ids_amounts, @xml_response, @oauth_params_foodget = Submission.calculate_nutrition(@submission.id)
+    @ingredients_amount, @oauth_params_foodsearch = Submission.get_fatsecret_food_ids(@submission.id)
   end
 
   def new
@@ -39,7 +39,7 @@ class SubmissionsController < ApplicationController
 
   def destroy
     @submission.destroy
-    redirect_to submissions_path
+    redirect_to root_url
   end
 
   private
