@@ -7,7 +7,6 @@ class SubmissionsController < ApplicationController
 
   def show
     @nutrition_facts, @nutrition_overview, @food_ids_amounts, @xml_response, @oauth_params_foodget = Submission.calculate_nutrition(@submission.id)
-    @ingredients_amount, @oauth_params_foodsearch = Submission.get_fatsecret_food_ids(@submission.id)
   end
 
   def new
@@ -17,6 +16,7 @@ class SubmissionsController < ApplicationController
   def create
     @submission = Submission.new(submission_params)
     if @submission.save
+      Submission.get_fatsecret_food_ids(@submission.id)
       redirect_to @submission
     elsif @submission.errors.messages[:url] == "has already been taken"
       @original_submission = Submission.find_by(url: submission_params[:url])

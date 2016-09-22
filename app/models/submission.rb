@@ -17,6 +17,7 @@ class Submission < ApplicationRecord
     i=0
     food_ids = []
     oauth_check = []
+    food_id_array = []
     ingredient_food_id = ""
     xml_response = ""
     # Retrieve ingredients_array from database that was called from Spoonacular
@@ -35,17 +36,19 @@ class Submission < ApplicationRecord
       ingredient_food_id = doc.xpath("/*[name()='foods']/*[name()='food']/*[name()='food_id']").text
       submission.ingredients.create(name: ingredient["name"], food_id: ingredient_food_id, amount: ingredient["amount"])
       oauth_check[i] = oauth_params
+      food_id_array[i] = ingredient_food_id
       i += 1
     end
-    return ingredients_amounts, oauth_check
+    return ingredients_amounts, oauth_check, food_id_array
   end
 
   def self.get_fatsecret_nutrition(id)
     i=0
+    xml_response_array = []
     xml_response = ""
     fatsecret_food_name = ""
     serving_description = ""
-    oauth_params_get = []
+    oauth_check_get = []
     nutrition_facts = []
     food_ids_amounts = Ingredient.where(submission_id: id).pluck(:food_id, :amount).to_a
     food_ids_amounts.each do |food_id, amount|
@@ -53,7 +56,7 @@ class Submission < ApplicationRecord
         :method => 'food.get',
         :food_id => food_id
       }
-      xml_response, oauth_params_get = generate_fatsecret_request(query_params)
+      xml_response, oauth_params = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
       fatsecret_food_name = doc.xpath("/*[name()='food']/*[name()='food_name']").text
       # calories = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='calories']").first.text
@@ -61,12 +64,14 @@ class Submission < ApplicationRecord
       # protein = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='protein']").first.text
       # fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.text
       # sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.text
-      # trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.text
-      # serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
+      # # trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.text
+      # # serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
       # nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar ]
+      oauth_check_get[i] = oauth_params
+      xml_response_array[i] = xml_response
       i += 1
     end
-    return nutrition_facts, food_ids_amounts, xml_response, oauth_params_get
+    return nutrition_facts, food_ids_amounts, xml_response_array, oauth_check_get
   end
 
   def self.calculate_nutrition(id)
