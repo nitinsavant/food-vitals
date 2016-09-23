@@ -58,20 +58,20 @@ class Submission < ApplicationRecord
       }
       xml_response, oauth_params = generate_fatsecret_request(query_params)
       doc = Nokogiri::XML(xml_response)
-      fatsecret_food_name = doc.xpath("/*[name()='food']/*[name()='food_name']").text
-      # calories = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='calories']").first.text
-      # carbohydrate = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='carbohydrate']").first.text
-      # protein = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='protein']").first.text
-      # fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.text
-      # sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.text
-      # # trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.text
-      # # serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
-      # nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar ]
+      fatsecret_food_name = doc.xpath("/*[name()='food']/*[name()='food_name']").try(:text)
+      calories = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='calories']").first.try(:text)
+      carbohydrate = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='carbohydrate']").first.try(:text)
+      protein = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='protein']").first.try(:text)
+      fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.try(:text)
+      sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.try(:text)
+      # trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.text
+      # serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
+      nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar ]
       oauth_check_get[i] = oauth_params
       xml_response_array[i] = xml_response
       i += 1
     end
-    return nutrition_facts, food_ids_amounts, xml_response_array, oauth_check_get
+    return nutrition_facts, xml_response_array, oauth_check_get
   end
 
   def self.calculate_nutrition(id)
@@ -135,7 +135,7 @@ class Submission < ApplicationRecord
     oauth_token = ''
     oauth_params = {
         :oauth_consumer_key => ENV['FATSECRET_CONSUMER_API_KEY'],
-        :oauth_nonce => Digest::MD5.hexdigest(rand(11).to_s),
+        :oauth_nonce => Digest::MD5.hexdigest(rand(100).to_s),
         :oauth_signature_method => "HMAC-SHA1",
         :oauth_timestamp => Time.now.to_i,
         :oauth_version => "1.0"

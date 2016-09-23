@@ -6,7 +6,10 @@ class SubmissionsController < ApplicationController
   end
 
   def show
-    @nutrition_facts, @nutrition_overview, @food_ids_amounts, @xml_response, @oauth_params_foodget = Submission.calculate_nutrition(@submission.id)
+    @submission = Submission.find(params[:id])
+    @ingredients = @submission.ingredients.all.inspect
+    @nutrition_facts, @nutrition_overview, @xml_response,
+      @oauth_params_foodget = Submission.calculate_nutrition(@submission.id)
   end
 
   def new
@@ -16,8 +19,12 @@ class SubmissionsController < ApplicationController
   def create
     @submission = Submission.new(submission_params)
     if @submission.save
-      Submission.get_fatsecret_food_ids(@submission.id)
-      redirect_to @submission
+      @ingredient_amounts, @oauth_check, @food_id_array = Submission.get_fatsecret_food_ids(@submission.id)
+      if @food_id_array.empty?
+        flash[:alert] = 'Sorry! I\'m unable to extract ingredients from that recipe website.'
+      else
+        redirect_to @submission
+      end
     elsif @submission.errors.messages[:url] == "has already been taken"
       @original_submission = Submission.find_by(url: submission_params[:url])
       redirect_to @original_submission

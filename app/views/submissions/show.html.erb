@@ -5,25 +5,25 @@
       <h1><%= @submission.title %> <h1>
       <h5><%=link_to "Original Recipe",  @submission.url %></h5><hr><br>
 
-      <h5>Ingredients amounts (Spoonacular extracted ingredients and amounts from URL)</h5><hr>
-      <%= @ingredients_amount %> <br><br>
+      <h5>
+        Ingredients (Spoonacular extracted ingredients from URL, Fatsecret
+        matched ingredients with food ids, and stored in model)
+      </h5><hr>
+      <%= @ingredients %> <br><br>
 
-      <h5>OAuth Parameters (foods.search --> grab food ids)</h5><hr>
-      <%= @oauth_params_foodsearch %> <br><br>
-
-      <h5>Food IDs (Using ingredients, FatSecret looked up corresponding food ids and stored in Ingredient model)</h5><hr>
       <%= @food_id_array %> <br><br>
-
-      <h5>Food IDs + Amounts</h5><hr>
-      <%= @food_ids_amounts %> <br><br>
 
       <h5>OAuth Parameters (foods.get --> grab nutrition)</h5><hr>
       <%= @oauth_params_foodget %> <br><br>
 
-      <h5>FatSecret Nutrition XML (FatSecret looked up ids to find nutrition)</h5><hr>
+      <h5>
+        FatSecret Nutrition XML (FatSecret looked up ids to find nutrition)
+      </h5><hr>
       <%= @xml_response %> <br><br>
 
-      <h5>Nutrition per ingredient (FatSecret looked up ids to find nutrition)</h5><hr>
+      <h5>
+        Nutrition per ingredient (FatSecret looked up ids to find nutrition)
+      </h5><hr>
       <%= @nutrition_facts %> <br><br>
 
       <h5>Nurition Facts (Nutrition calculated for entire recipe)</h5><hr>
