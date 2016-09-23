@@ -64,9 +64,9 @@ class Submission < ApplicationRecord
       protein = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='protein']").first.try(:text)
       fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.try(:text)
       sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.try(:text)
-      # trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.text
+      trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.try(:text)
       # serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
-      nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar ]
+      nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar, trans_fat ]
       oauth_check_get[i] = oauth_params
       xml_response_array[i] = xml_response
       i += 1
@@ -81,14 +81,16 @@ class Submission < ApplicationRecord
     total_protein = 0
     total_fiber = 0
     total_sugar = 0
-    nutrition_facts.each do |fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar |
+    total_trans = 0
+    nutrition_facts.each do |fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar, trans_fat |
       total_calories = total_calories + (amount * calories.to_f)
       total_carbs = total_carbs + (amount * carbohydrate.to_f)
       total_protein = total_protein + (amount * protein.to_f)
       total_fiber = total_fiber + (amount * fiber.to_f)
       total_sugar = total_sugar + (amount * sugar.to_f)
+      total_trans = total_trans + (amount * trans_fat.to_f)
     end
-    nutrition_overview = [total_calories.round, total_carbs.round, total_protein.round, total_fiber.round, total_sugar.round]
+    nutrition_overview = [total_calories.round, total_carbs.round, total_protein.round, total_fiber.round, total_sugar.round, total_trans.round ]
     return nutrition_facts, nutrition_overview, food_ids_amounts, xml_response
   end
 
