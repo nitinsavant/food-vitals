@@ -50,7 +50,8 @@ class Submission < ApplicationRecord
     serving_description = ""
     oauth_check_get = []
     nutrition_facts = []
-    food_ids_amounts = Ingredient.where(submission_id: id).pluck(:food_id, :amount).to_a
+    food_ids_amounts =
+      Ingredient.where(submission_id: id).pluck(:food_id, :amount).to_a
     food_ids_amounts.each do |food_id, amount|
       query_params = {
         :method => 'food.get',
@@ -65,17 +66,18 @@ class Submission < ApplicationRecord
       fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.try(:text)
       sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.try(:text)
       trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.try(:text)
-      # serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.text
+      serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.try(:text)
+      ingredients_summary[i] = serving_description
       nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar, trans_fat ]
       oauth_check_get[i] = oauth_params
       xml_response_array[i] = xml_response
       i += 1
     end
-    return nutrition_facts, xml_response_array, oauth_check_get
+    return nutrition_facts, xml_response_array, oauth_check_get, ingredient_summary
   end
 
   def self.calculate_nutrition(id)
-    nutrition_facts, food_ids_amounts, xml_response = get_fatsecret_nutrition(id)
+    nutrition_facts, xml_response_array, oauth_check_get = get_fatsecret_nutrition(id)
     total_calories = 0
     total_carbs = 0
     total_protein = 0
@@ -91,7 +93,7 @@ class Submission < ApplicationRecord
       total_trans = total_trans + (amount * trans_fat.to_f)
     end
     nutrition_overview = [total_calories.round, total_carbs.round, total_protein.round, total_fiber.round, total_sugar.round, total_trans.round ]
-    return nutrition_facts, nutrition_overview, food_ids_amounts, xml_response
+    return nutrition_facts, nutrition_overview, xml_response_array, oauth_check_get
   end
 
   private

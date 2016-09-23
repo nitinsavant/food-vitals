@@ -19,7 +19,7 @@ class SubmissionsController < ApplicationController
   def create
     @submission = Submission.new(submission_params)
     if @submission.save
-      @ingredient_amounts, @oauth_check, @food_id_array = Submission.get_fatsecret_food_ids(@submission.id)
+      Submission.get_fatsecret_food_ids(@submission.id)
       if @food_id_array.empty?
         flash[:alert] = 'Sorry! I\'m unable to extract ingredients from that recipe website.'
       else
