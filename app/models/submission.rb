@@ -66,14 +66,13 @@ class Submission < ApplicationRecord
       fiber = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='fiber']").first.try(:text)
       sugar = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='sugar']").first.try(:text)
       trans_fat = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='trans_fat']").first.try(:text)
-      serving_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='serving_description']").first.try(:text)
-      ingredients_summary[i] = serving_description
-      nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar, trans_fat ]
+      measurement_description = doc.xpath("/*[name()='food']/*[name()='servings']/*[name()='serving']/*[name()='measurement_description']").first.try(:text)
+      nutrition_facts[i] = [fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar, trans_fat, measurement_description ]
       oauth_check_get[i] = oauth_params
       xml_response_array[i] = xml_response
       i += 1
     end
-    return nutrition_facts, xml_response_array, oauth_check_get, ingredient_summary
+    return nutrition_facts, xml_response_array, oauth_check_get
   end
 
   def self.calculate_nutrition(id)
@@ -84,16 +83,21 @@ class Submission < ApplicationRecord
     total_fiber = 0
     total_sugar = 0
     total_trans = 0
-    nutrition_facts.each do |fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar, trans_fat |
+    ingredients_summary = {}
+    i=0
+    nutrition_facts.each do |fatsecret_food_name, amount, calories, carbohydrate, protein, fiber, sugar, trans_fat, measurement_description |
       total_calories = total_calories + (amount * calories.to_f)
       total_carbs = total_carbs + (amount * carbohydrate.to_f)
       total_protein = total_protein + (amount * protein.to_f)
       total_fiber = total_fiber + (amount * fiber.to_f)
       total_sugar = total_sugar + (amount * sugar.to_f)
       total_trans = total_trans + (amount * trans_fat.to_f)
+      measurement_amount = amount.to_s + " " + measurement_description
+      ingredients_summary[fatsecret_food_name] = measurement_amount
+      i += 1
     end
     nutrition_overview = [total_calories.round, total_carbs.round, total_protein.round, total_fiber.round, total_sugar.round, total_trans.round ]
-    return nutrition_facts, nutrition_overview, xml_response_array, oauth_check_get
+    return nutrition_facts, nutrition_overview, xml_response_array, oauth_check_get, ingredients_summary
   end
 
   private

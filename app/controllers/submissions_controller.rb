@@ -9,7 +9,8 @@ class SubmissionsController < ApplicationController
     @submission = Submission.find(params[:id])
     @ingredients = @submission.ingredients.all.inspect
     @nutrition_facts, @nutrition_overview, @xml_response,
-      @oauth_params_foodget = Submission.calculate_nutrition(@submission.id)
+      @oauth_params_foodget, @ingredients_summary =
+        Submission.calculate_nutrition(@submission.id)
   end
 
   def new
@@ -21,7 +22,8 @@ class SubmissionsController < ApplicationController
     if @submission.save
       Submission.get_fatsecret_food_ids(@submission.id)
       if @food_id_array.empty?
-        flash[:alert] = 'Sorry! I\'m unable to extract ingredients from that recipe website.'
+        flash[:alert] =
+          'Sorry! I\'m unable to extract ingredients from that recipe website.'
       else
         redirect_to @submission
       end

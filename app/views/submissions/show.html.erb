@@ -27,7 +27,11 @@
       <h5>
         Ingredients
       </h5><hr>
-      <%= @nutrition_facts %> <br><br>
+
+      <% @ingredients_summary.each do |name, serving| %>
+        <%= name %>: <%= serving %> <br />
+      <% end %>
+      <br>
 
       <h5>Nurition Facts (Nutrition calculated for entire recipe)</h5><hr>
       <%= render 'nutrition' %>
