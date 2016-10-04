@@ -1,7 +1,7 @@
 <%= form_for(@submission, url: root_url ) do |f| %>
 
   <%= render 'shared/error_messages', object: f.object %>
-  <%= f.text_field :url, class: 'form-control', placeholder: 'Paste recipe link and hit enter.' %>
+  <%= f.text_field :url, class: 'form-control', placeholder: 'Paste recipe link here' %>
   <%= f.submit "Submit", class: 'button postfix' %>
 
 <% end %>

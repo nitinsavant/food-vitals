@@ -1,15 +1,21 @@
-<h1>Food Vitals</h1>
+<div class="row align-center">
+  <div class="small-10 medium-8 large-6 columns">
+    <h1 class="text-center">Food Vitals</h1>
 
-<%= render 'shared/form' %>
+    <%= render 'shared/form' %>
 
-<% if @nutrition_overview %>
+    <% if @nutrition_overview %>
 
-  <div id="submission">
-    <h1><%= @submission.title %> <h1>
-    <h5><%=link_to "Original Recipe",  @submission.url %></h5><hr><br>
-    <h5>Nurition Facts (Nutrition calculated for entire recipe)</h5><hr>
+      <div id="submission">
+        <h1><%= @submission.title %> <h1>
+        <h5><%=link_to "Original Recipe",  @submission.url %></h5><hr><br>
+        <h5>Nurition Facts (Nutrition calculated for entire recipe)</h5><hr>
 
-    <%= render 'shared/nutrition' %>
+        <%= render 'shared/nutrition' %>
+      </div>
+
+    <% end %>
+
   </div>
-  
-<% end %>
+
+</div>
