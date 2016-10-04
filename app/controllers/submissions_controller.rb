@@ -23,16 +23,13 @@ class SubmissionsController < ApplicationController
       @ingredients_amounts, @oauth_check, @food_id_array = Submission.get_fatsecret_food_ids(@submission.id)
       if @food_id_array.empty?
         flash[:alert] =
-          'Sorry! I\'m unable to extract ingredients from that recipe website.'
-      else
-        redirect_to @submission
+          'Shoot! I couldn\'t extract ingredients from that recipe site.'
       end
     elsif @submission.errors.messages[:url] == "has already been taken"
       @original_submission = Submission.find_by(url: submission_params[:url])
       redirect_to @original_submission
-    else
-      render 'static_pages/home'
     end
+    render 'static_pages/home'
   end
 
   def edit
@@ -48,7 +45,7 @@ class SubmissionsController < ApplicationController
 
   def destroy
     @submission.destroy
-    redirect_to root_url
+    redirect_to submissions_path
   end
 
   private
