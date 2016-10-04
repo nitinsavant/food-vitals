@@ -3,6 +3,13 @@
 <%= render 'shared/form' %>
 
 <% if @nutrition_overview %>
-<h5>Nurition Facts (Nutrition calculated for entire recipe)</h5><hr>
-<%= render 'shared/nutrition' %>
+
+  <div id="submission">
+    <h1><%= @submission.title %> <h1>
+    <h5><%=link_to "Original Recipe",  @submission.url %></h5><hr><br>
+    <h5>Nurition Facts (Nutrition calculated for entire recipe)</h5><hr>
+
+    <%= render 'shared/nutrition' %>
+  </div>
+  
 <% end %>
