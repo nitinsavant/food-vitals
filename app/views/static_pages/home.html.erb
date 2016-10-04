@@ -1,3 +1,8 @@
 <h1>Food Vitals</h1>
 
 <%= render 'shared/form' %>
+
+<% if @nutrition_overview %>
+<h5>Nurition Facts (Nutrition calculated for entire recipe)</h5><hr>
+<%= render 'shared/nutrition' %>
+<% end %>
