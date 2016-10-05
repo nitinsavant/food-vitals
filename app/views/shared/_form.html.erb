@@ -1,7 +1,11 @@
-<%= form_for(@submission, url: root_url ) do |f| %>
-
-  <%= render 'shared/error_messages', object: f.object %>
-  <%= f.text_field :url, class: 'form-control', placeholder: 'Paste recipe link here' %>
-  <%= f.submit "Submit", class: 'button postfix' %>
-
-<% end %>
+<div class="row">
+  <%= form_for(@submission, url: root_url ) do |f| %>
+    <%= render 'shared/error_messages', object: f.object %>
+    <div class="input-group">
+      <%= f.text_field :url, class: 'form-control input-group-field', placeholder: 'Paste recipe link here' %>
+      <div class="input-group-button">
+        <%= f.submit "Submit", class: 'button' %>
+      </div>
+    </div>
+  <% end %>
+</div>
